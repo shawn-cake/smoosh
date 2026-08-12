@@ -1,26 +1,24 @@
-# SmooshBoost - Quick Reference Card
+# Image Smoosh - Quick Reference Card
 
-**Tagline:** Smoosh & Boost Images
+**Tagline:** Smoosh your images
 
-## What is SmooshBoost?
-An image optimization suite for digital marketing agencies. Compress images for web performance (Smoosh), then inject SEO-relevant metadata (Boost).
+## What is Image Smoosh?
+A browser-based image compression tool for digital marketing agencies — the first tool in the **Smoosh** suite. Compress images for web performance, right in the browser, then download individually or as a ZIP.
 
 ---
 
 ## Workflow
 
-## Streamlined Workflow
-
 ```
-Upload → [Auto-Compress] → [🚀 Boost per image] → Download
+Drop files → Queue → Confirm format → Smoosh → Download
 ```
 
 | Phase | What Happens | Trigger |
 |-------|--------------|---------|
-| Smoosh | Auto-compress, strips existing metadata | Automatic on upload |
-| Boost | Configure geo-tags, copyright, title/description per image | Click 🚀 accordion |
-
-**Boost Only toggle:** A checkbox that skips compression entirely. When enabled, images go straight to the Boost phase without being compressed.
+| Queue | Files are added to the queue; no processing yet | Automatic on drop |
+| Confirm | User picks the output format for the batch | Manual |
+| Smoosh | Compress queued images (strips existing metadata) | Click the Smoosh button |
+| Download | Save results individually or as a single ZIP | Manual |
 
 ---
 
@@ -37,21 +35,6 @@ Upload → [Auto-Compress] → [🚀 Boost per image] → Download
 | WebP | WebP | @jsquash/webp |
 | WebP | MozJPG | @jsquash/jpeg |
 | WebP | PNG | TinyPNG API (OxiPNG fallback) |
-
----
-
-## Metadata Options (Boost Phase)
-
-| Metadata Type | JPG/MozJPG | PNG | WebP | SEO Value |
-|---------------|------------|-----|------|-----------|
-| Geo-tagging (GPS) | ✅ Full EXIF | ❌ No support | ✅ Full EXIF | Local SEO |
-| Copyright | ✅ Full EXIF | ✅ tEXt chunks | ✅ Full EXIF | Attribution |
-| Title/Description | ✅ Full EXIF | ✅ tEXt chunks | ✅ Full EXIF | Image search |
-
-**Notes:**
-- JPG and WebP have full EXIF support including GPS coordinates
-- PNG supports text metadata via tEXt chunks but cannot store GPS coordinates
-- GPS metadata is supported in JPG and WebP formats (not PNG)
 
 ---
 
@@ -74,22 +57,10 @@ Upload → [Auto-Compress] → [🚀 Boost per image] → Download
 - [x] File picker
 
 **Smoosh (Compression)**
-- [x] Auto-compression on upload
+- [x] Compression on demand (Smoosh button)
 - [x] Auto engine routing (MozJPG, OxiPNG, WebP)
 - [x] Savings display per image
 - [x] Progress indicator in status bar
-
-**Boost (Metadata) - Per Image**
-- [x] 🚀 Accordion per image in queue
-- [x] Geo-tagging via Google Maps link parsing (no API cost)
-- [x] Geo-tagging via manual coordinates
-- [x] Copyright and Author fields (separate)
-- [x] Title/description with character counters
-- [x] Apply Metadata button per image
-- [x] Apply to All Images button
-- [x] Read-only mode after applying (with Reset option)
-- [x] Format compatibility warnings (PNG no GPS)
-- [ ] Client presets (future)
 
 **Download**
 - [x] Individual downloads per image
@@ -103,8 +74,8 @@ Upload → [Auto-Compress] → [🚀 Boost per image] → Download
 
 1. **Header** — Logo + info tooltip (top right)
 2. **Upload Zone** — Drag/drop + file picker
-3. **Format Selector** — Format mode (hidden when images in queue)
-4. **Queue** — Images with status, savings, 🚀 Boost accordion per image
+3. **Format Selector** — Confirm output format for the batch (WebP default)
+4. **Queue** — Images with status and savings
 5. **Processing Status** — Compression progress bar
 6. **Summary Bar** — Total savings + format conversion info
 7. **Download Section** — Download All + Clear Queue buttons
@@ -117,23 +88,8 @@ Upload → [Auto-Compress] → [🚀 Boost per image] → Download
 |--------|------|-------|-------------|
 | Queued | ○ | Gray 400 | Waiting to compress |
 | Compressing | ● | Cake Blue | Compression in progress |
-| Complete | ✓ | Success | Ready for Boost or download |
-| Boosting | ● | Cake Blue | Applying metadata |
-| Boosted | ✓ + tag | Success | Metadata applied |
-| Boost Error | ✗ | Error | Metadata failed (image still downloadable) |
+| Complete | ✓ | Success | Ready for download |
 | Error | ✗ | Error | Compression failed |
-
----
-
-## Boost Status States
-
-| Status | Description |
-|--------|-------------|
-| `pending` | Not yet boosted |
-| `boosting` | Currently injecting metadata |
-| `boosted` | Metadata successfully applied |
-| `boost-skipped` | User skipped Boost phase |
-| `boost-failed` | Metadata injection failed |
 
 ---
 
@@ -187,11 +143,6 @@ Upload → [Auto-Compress] → [🚀 Boost per image] → Download
 | Styling | Tailwind CSS |
 | Build | Vite |
 | Compression | TinyPNG + @jsquash libraries (MozJPEG, OxiPNG, WebP via WASM) |
-| Metadata (JPG) | piexifjs (EXIF writing) |
-| Metadata (PNG) | png-chunk-text (tEXt chunks) |
-| Metadata (WebP) | Custom RIFF chunk manipulation (browser-native) |
-| Geo Parsing | Google Maps link regex (primary, no API) |
-| Geocoding | Google Places API (optional enhancement) |
 | ZIP | JSZip |
 | Icons | FontAwesome |
 | Toasts | Sonner |
@@ -217,15 +168,6 @@ Original filename preserved. Extension changes if format changes:
 | `batch_limit_exceeded` | More than 20 images | Error |
 | `quota_exceeded` | TinyPNG limit reached | Error |
 | `compression_failed` | Engine error | Error |
-| `metadata_injection_failed` | Technical error during EXIF/chunk write | Error |
-| `metadata_format_unsupported` | Format doesn't support requested metadata (e.g., PNG + GPS) | Warning |
-| `geocoding_failed` | Address lookup failed | Error |
-| `geocoding_parse_failed` | Google Maps link couldn't be parsed | Error |
-| `coordinate_out_of_range` | Lat/long outside valid range | Error |
-
-**Notes:**
-- `metadata_format_unsupported` is a non-blocking warning. Processing continues and unsupported metadata is skipped.
-- Boost errors don't prevent download—images are still available (compressed, without metadata).
 
 ---
 
@@ -240,9 +182,7 @@ Original filename preserved. Extension changes if format changes:
 ## Future Features (v2+)
 
 - Client presets
-- Batch metadata templates
 - Export report (CSV/PDF)
-- IPTC keywords
 - Filename slugification
 - API mode
 - Team features

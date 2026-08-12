@@ -1,12 +1,14 @@
 # Smoosh
 
-**Smoosh Images** — A browser-based image compression tool for Cake Websites, a digital marketing agency. Also available as a [Figma plugin](#figma-plugin) for compressing frames directly from your design files.
-
-> Formerly **SmooshBoost**. The "Boost" (SEO metadata injection) feature was removed in v0.4.0 — see [logs/CHANGELOG.md](logs/CHANGELOG.md).
+**Smoosh** is a compression suite for Cake Websites, a digital marketing agency. **Image Smoosh** is its first tool — a browser-based image compressor, also available as a [Figma plugin](#figma-plugin) for compressing frames directly from your design files.
 
 ## Overview
 
-Smoosh strips images down to optimal file size using best-in-class compression engines. Drop images in, confirm the output format, hit **Smoosh**, download the results.
+Image Smoosh strips images down to optimal file size using best-in-class compression engines. Drop images in, confirm the output format, hit **Smoosh**, download the results.
+
+### The Smoosh family
+
+Smoosh is built to grow into a family of `{Type} Smoosh` tools (PDF Smoosh, SVG Smoosh, and more). Future tools ship as modules in this repo — one deployment, not separate products. **Image Smoosh** is the first.
 
 ## Features
 
@@ -56,8 +58,8 @@ Note on privacy: JPG and WebP compression run entirely in your browser via WASM.
 
 ```bash
 # Clone the repository
-git clone https://github.com/shawn-cake/smooshboost.git
-cd smooshboost
+git clone https://github.com/shawn-cake/smoosh.git
+cd smoosh
 
 # Install dependencies
 npm install
@@ -123,7 +125,7 @@ Smoosh is deployed on Vercel. The TinyPNG API proxy runs as a Vercel serverless 
 ## Project Structure
 
 ```
-smooshboost/
+smoosh/
 ├── api/
 │   └── tinypng.ts            # TinyPNG API proxy (Vercel serverless)
 ├── src/

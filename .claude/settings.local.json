@@ -22,7 +22,25 @@
       "Bash(curl:*)",
       "mcp__f236e21f-3eb6-4d59-8827-6712cd1c4a67__list_teams",
       "mcp__f236e21f-3eb6-4d59-8827-6712cd1c4a67__list_projects",
-      "mcp__f236e21f-3eb6-4d59-8827-6712cd1c4a67__get_project"
+      "mcp__f236e21f-3eb6-4d59-8827-6712cd1c4a67__get_project",
+      "Bash(gh pr create --base main --head figma-plugin/webp-theme-ui --title 'Figma plugin: WebP output, any-layer export, web-app theme [v0.3.0]' --body ' *)",
+      "Bash(grep -o '\\\\.append\\([a-zA-Z_$][a-zA-Z0-9_$]*,[a-zA-Z_$][a-zA-Z0-9_$]*\\)' ui.html)",
+      "Bash(node -e ' *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(python3 -)",
+      "Bash(sed -i '' 's/\\\\[SmooshBoost UI\\\\]/[Smoosh UI]/; s/\\\\[SmooshBoost\\\\]/[Smoosh]/' packages/figma-plugin/src/ui.ts packages/figma-plugin/src/compression.ts)",
+      "Bash(echo \"clean: $?\")",
+      "Bash(git restore *)",
+      "Bash(gh pr create --title 'Rebrand to Smoosh; remove Boost \\(metadata injection\\) [v0.4.0]' --body ' *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(grep -nE \"^#{1,4} \" guidelines/smoosh-technical-spec.md)",
+      "Bash(python3 -c ' *)",
+      "Bash(echo \"---EXIT:$?---\")",
+      "Bash(grep -nE \"^#{1,4} \" guidelines/guidelines.md)",
+      "Bash(grep -nA1 -- \"^---$\" guidelines/guidelines.md)",
+      "Bash(grep -B1 -- \"^[0-9]*---$\")",
+      "Bash(grep -vE \"^\\\\./logs/|spec-image-smoosh-rebrand|wasm-data\\\\.ts|/ui\\\\.html$|/code\\\\.js$\")",
+      "Bash(node -p \"Object.keys\\(require\\('./package.json'\\).scripts\\).join\\(', '\\)\")"
     ]
   }
 }

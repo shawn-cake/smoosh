@@ -8,7 +8,7 @@ export function Footer() {
 
   return (
     <footer className="py-8 text-center space-y-3">
-      <img src={logo} alt="Smoosh - Image Compression" width={160} className="mx-auto opacity-50" />
+      <img src={logo} alt="Smoosh" width={160} className="mx-auto opacity-50" />
       <div className="flex items-center justify-center gap-2">
         <p className="text-xs text-gray-700">
           © Cake Websites · v0.4.0

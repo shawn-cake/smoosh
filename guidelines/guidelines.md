@@ -1,8 +1,8 @@
-# SmooshBoost - Design Guidelines
+# Image Smoosh - Design Guidelines
 
 ## Overview
 
-This document defines the visual design system for SmooshBoost, an image optimization suite for Cake marketing agency. The design should feel professional, clean, and highly functional—prioritizing clarity and ease of use for batch image compression and metadata injection workflows.
+This document defines the visual design system for Image Smoosh, a browser-based image compression tool for Cake marketing agency. The design should feel professional, clean, and highly functional—prioritizing clarity and ease of use for batch image compression workflows.
 
 ---
 
@@ -66,9 +66,9 @@ This document defines the visual design system for SmooshBoost, an image optimiz
 ### Font Stack
 
 - **Body Font:** Spline Sans Mono (Google Fonts) — used for all body text, labels, inputs, captions, and UI elements
-- **Heading Font:** Syne (Google Fonts) — used exclusively for headings ("Upload Images", "Boost Options") via `font-heading` utility class
-- **Monospace:** Spline Sans Mono, "SF Mono", "Fira Code", Consolas, monospace (same as body font; used for file sizes, coordinates, technical data)
-- **Logo Font:** Syne Extra Bold (Google Fonts) — used as the design source for the SVG logo. "smoosh" is stylized in lowercase, "BOOST" in uppercase
+- **Heading Font:** Syne (Google Fonts) — used exclusively for headings (e.g. "Upload Images") via `font-heading` utility class
+- **Monospace:** Spline Sans Mono, "SF Mono", "Fira Code", Consolas, monospace (same as body font; used for file sizes, technical data)
+- **Logo Font:** Syne Extra Bold (Google Fonts) — used as the design source for the SVG logo. "smoosh" is stylized in lowercase
 - **CSS Variables:** `--font-sans` and `--font-mono` both map to Spline Sans Mono; `--font-heading` maps to Syne
 
 ### Fluid Scaling
@@ -94,7 +94,7 @@ Because Spline Sans Mono's monospaced glyphs read visually larger than proportio
 | Element | Tailwind Class | Font | Weight |
 |---------|---------------|------|--------|
 | H1 (Page Title, e.g. "Upload Images") | `text-2xl font-heading` | Syne | 600 (Semibold) |
-| H2 (Section Title, e.g. "Boost Options") | `text-base font-heading` | Syne | 600 (Semibold) |
+| H2 (Section Title, e.g. "Output Format") | `text-base font-heading` | Syne | 600 (Semibold) |
 | Body / Labels | `text-xs` | Spline Sans Mono | 400–500 |
 | Caption / Small Text | `text-xs` | Spline Sans Mono | 400 |
 | Button (sm/md) | `text-xs` | Spline Sans Mono | 500 (Medium) |
@@ -137,7 +137,7 @@ Use an 8px base grid. All spacing tokens are `rem`-based so they scale with the 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ HEADER                                                          │
-│ SmooshBoost              [minimal branding]                     │
+│ smoosh                   [minimal branding]                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │ UPLOAD ZONE                                                     │
@@ -148,25 +148,16 @@ Use an 8px base grid. All spacing tokens are `rem`-based so they scale with the 
 │ │              [Select Files]                                 │ │
 │ └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
-│ BOOST-ONLY MODE INDICATOR (when active)                         │
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │ ℹ️ Compression skipped - Images will keep original format   │ │
-│ └─────────────────────────────────────────────────────────────┘ │
+│ OUTPUT FORMAT (confirm before smooshing)                        │
+│ ( ) JPG   ( ) PNG   (x) WebP (default)                          │
 │                                                                 │
-│ PROCESSING BUTTONS                                              │
-│ [Compress Images]  or  [Add Metadata (Boost)]  [Skip & Download]│
-│                                                                 │
-│ METADATA OPTIONS (collapsible, collapsed by default)            │
-│ ┌─────────────────────────────────────────────────────────────┐ │
-│ │ ▸ Metadata Options (Optional - Boost Phase)          (0/3) │ │
-│ └─────────────────────────────────────────────────────────────┘ │
+│ [Smoosh 5 images]                                               │
 │                                                                 │
 │ QUEUE                                                           │
 │ ┌─────────────────────────────────────────────────────────────┐ │
 │ │ [thumb] filename.png                                       │ │
 │ │         1.4 MB → 448 KB (68% smaller)                      │ │
 │ │         ✓ Complete · TinyPNG                               │ │
-│ │         📍 Geo: Not set · ©: Not set · 📝: Not set  [Edit] │ │
 │ ├─────────────────────────────────────────────────────────────┤ │
 │ │ [thumb] photo.jpg                                          │ │
 │ │         Processing...                              ●       │ │
@@ -175,11 +166,10 @@ Use an 8px base grid. All spacing tokens are `rem`-based so they scale with the 
 │ SUMMARY BAR                                                     │
 │ ┌─────────────────────────────────────────────────────────────┐ │
 │ │ 5 images · 8.2 MB → 2.1 MB · 74% total savings             │ │
-│ │ Metadata: 5 geo-tagged · 5 with copyright · 3 with titles  │ │
 │ └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
 │ DOWNLOAD SECTION                                                │
-│   [Download All with Metadata (ZIP)]    [Clear Queue]           │
+│   [Download All (ZIP)]    [Clear Queue]                         │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -303,59 +293,23 @@ background: radial-gradient(circle at 50% 30%, #ffffff, #fefeff, #f6f9fc, #e2ecf
 
 ---
 
-## Boost Workflow Components
+## Processing Controls
 
-### Boost Only Toggle
+### Format Selector
 
-**Position:** Within the Format Selector area, shown only when no images are in the queue
-
-**Layout:**
-```
-☐ Boost Only (skip compression)
-```
-
-**Styling:**
-- Component: Checkbox toggle
-- Font: 14px medium
-- Color: Gray 600 (`#4B5563`)
-- When checked: Primary Blue (`#4074A8`)
+**Position:** Below the upload zone, shown once images are in the queue
 
 **Behavior:**
-- Default: unchecked (compression + boost workflow)
-- When checked, compression is skipped — images keep their original format
-- Format selector is hidden when Boost Only is active
-- Toggle is hidden once images are added to the queue
+- Compression does NOT run automatically on upload — files queue and wait for the user
+- User confirms the output format before compression runs
+- Options: JPG, PNG, WebP — WebP is the default
+- Format conversion among JPG/PNG/WebP is supported (e.g. JPG → WebP)
 
 ---
 
-### Boost-Only Mode Indicator
+### Smoosh Button
 
-**Trigger:** Appears when "Boost Only" mode is active and images are in queue
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────────┐
-│ ℹ️ Compression skipped - Images will keep original      │
-│    format                                               │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Styling:**
-- Background: Blue 50 (`#EBF1F7`)
-- Text: Primary Blue (`#4074A8`), 14px regular
-- Border: 1px solid Blue 100 (`#D1E0EE`)
-- Border radius: 6px
-- Padding: 12px 16px
-- Icon: `fa-info-circle` (16px)
-- Position: Above queue, below upload zone
-
----
-
-### Two-Step Processing Buttons
-
-#### Step 1: "Compress Images" Button
-
-**Appears:** After images uploaded, before compression
+**Appears:** After images are uploaded and the output format is confirmed
 
 **Styling:**
 - Background: Primary Blue (`#4074A8`)
@@ -364,461 +318,53 @@ background: radial-gradient(circle at 50% 30%, #ffffff, #fefeff, #f6f9fc, #e2ecf
 - Border radius: 6px
 - Hover: Blue 700 (`#2D5276`)
 - Icon: `fa-compress` (left of text)
+- Label: "Smoosh {n} image(s)"
 
 **During Compression:**
 - Button changes to: `[Compressing... 1 of 5]` with spinner
+- Up to 3 images are compressed concurrently (batch limit: 20)
 - "Cancel" button appears (gray, bordered)
 
-#### Step 2: "Add Metadata (Boost)" Button
-
-**Appears:** After compression completes, replaces "Compress Images"
-
-**Styling:**
-- Background: Accent Yellow (`#F2A918`)
-- Text: Gray 900 (`#111827`), 14px medium
-- Padding: 12px 24px
-- Border radius: 6px
-- Hover: Yellow 700 (`#B87D0E`)
-- Icon: `fa-tag` (left of text)
-- Disabled state: 50% opacity when no metadata options enabled
-
-#### "Skip & Download All" Button
-
-**Appears:** Next to "Add Metadata (Boost)" button
-
-**Styling:**
-- Background: Transparent
-- Text: Primary Blue (`#4074A8`)
-- Border: 1px solid Primary Blue
-- Padding: 10px 16px
-- Hover: Blue 50 background
-- Icon: `fa-download`
-
-**Behavior:**
-- Clicking "Boost" triggers metadata injection
-- "Skip & Download All" proceeds directly to ZIP download
-- Individual download buttons remain available per image
-
 ---
 
-### Metadata Options Panel
-
-#### Panel Header (Collapsed - Default State)
-
-**Layout:**
-```
-▸ Metadata Options (Optional - Boost Phase)           (0/3)
-```
-
-**Styling:**
-- Background: Gray 50 (`#F9FAFB`)
-- Border: 1px solid Gray 200 (`#E5E7EB`)
-- Border radius: 8px
-- Padding: 16px 20px
-- Text: Gray 800 (`#1F2937`), 16px semibold
-- Chevron: Gray 500, rotates 90° when expanded
-- Counter: Gray 500, shows "X/3 enabled options"
-- Cursor: pointer
-- Hover: Gray 100 background
-
-#### Panel Body (Expanded State)
-
-**Apply Settings Toggle:**
-```
-Apply settings:  ● To all images    ○ Per image
-```
-
-**Position:** Top of expanded panel, 20px padding below header
-
-**Styling:**
-- Font: 14px medium
-- Default: "To all images" selected
-
-**Behavior:**
-- Switching to "Per image" clears global fields, shows per-image forms in queue
-- Switching to "To all images" clears per-image fields
-- Confirmation dialog if metadata already entered
-
----
-
-#### Geo-Location Section
-
-**Layout (Collapsed - Checkbox Only):**
-```
-☐ Add geo-location (Local SEO)
-```
-
-**Layout (Expanded):**
-```
-☑ Add geo-location (Local SEO)
-
-  Google Maps/Place Link:
-  [_____________________________________________]  🎯
-
-  Or enter coordinates manually:
-  Latitude: [_______] Longitude: [_______]
-
-  Current: 35.5951° N, 82.5515° W
-```
-
-**Google Maps Link Field:**
-- Label: "Google Maps/Place Link:" (Gray 700, 13px medium)
-- Input: Text field, full width
-- Placeholder: "Paste Google Maps or Google Place link here"
-- Icon button (🎯): "Parse Location"
-  - Background: Primary Blue
-  - Icon: `fa-location-crosshairs`
-  - Tooltip: "Extract coordinates from link"
-
-**Manual Coordinate Entry:**
-- Label: "Or enter coordinates manually:" (Gray 500, 13px regular)
-- Two inputs side-by-side:
-  - Latitude: Number input, placeholder "35.5951"
-  - Longitude: Number input, placeholder "-82.5515"
-- Validation: -90 to 90 for latitude, -180 to 180 for longitude
-- Format: Decimal degrees
-
-**Current Coordinates Display:**
-- Format: `35.5951° N, 82.5515° W`
-- Font: Spline Sans Mono, `text-xs`
-- Color: Primary Blue
-- Hidden until valid coordinates entered
-
-**Google Maps Link Parsing:**
-Extract from URL patterns:
-- `maps.google.com/?q=LAT,LNG`
-- `google.com/maps/@LAT,LNG,ZOOM`
-- `google.com/maps/place/NAME/@LAT,LNG`
-- Plus codes: `google.com/maps/place/849V+XW`
-
-**Optional: Google Places API (Future Enhancement)**
-- Address autocomplete with Google Places API
-- Requires API key configuration
-- Fallback to manual entry if not configured
-
----
-
-#### Copyright Section
-
-**Layout (Collapsed):**
-```
-☐ Add copyright notice
-```
-
-**Layout (Expanded):**
-```
-☑ Add copyright notice
-
-  [© 2026 Cake Websites. All rights reserved.______]
-
-  Variables: {year} {client}
-  12 / 160 characters
-```
-
-**Input Field:**
-- Type: Text input, full width
-- Placeholder: "© 2026 Cake Websites. All rights reserved."
-- Max length: 160 characters
-- Character counter: `X / 160 characters` (Gray 500, 12px)
-
-**Template Variables Helper:**
-- Text: "Variables: {year} {client}" (Gray 500, 12px)
-- Position: Below input
-- Tooltip on hover:
-  - `{year}` → Current year (2026)
-  - `{client}` → Client name (future preset feature)
-
----
-
-#### Title & Description Section
-
-**Layout (Collapsed):**
-```
-☐ Add title & description (Image SEO)
-```
-
-**Layout (Expanded):**
-```
-☑ Add title & description (Image SEO)
-
-  Title:
-  [_____________________________________________]
-  0 / 60 characters (recommended max)
-
-  Description:
-  [_____________________________________________]
-  [_____________________________________________]
-  0 / 160 characters (recommended max)
-```
-
-**Title Field:**
-- Type: Text input, full width
-- Placeholder: "Professional landscape photo by Cake Websites"
-- Max length: 60 characters (soft limit, SEO recommendation)
-- Character counter: `X / 60 characters (recommended max)` (Gray 500, 12px)
-- Counter turns Yellow 700 if >60, Error Red if >100
-
-**Description Field:**
-- Type: Textarea, 3 rows
-- Placeholder: "High-quality image of the Blue Ridge Mountains landscape looking west during sunset in Autumn."
-- Max length: 160 characters (soft limit)
-- Character counter: `X / 160 characters (recommended max)` (Gray 500, 12px)
-- Counter turns Yellow 700 if >160, Error Red if >300
-- Resize: Vertical only
-
----
-
-### Per-Image Metadata Controls
-
-#### Queue Item - Collapsed (Default)
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────────┐
-│ [thumb] filename.png                                    │
-│         1.4 MB → 448 KB (68% smaller)                   │
-│         ✓ Compressed · TinyPNG                          │
-│         📍 Geo: Not set · ©: Not set · 📝: Not set      │
-│                                               [Edit]    │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Metadata Status Badges:**
-- Position: Below compression details
-- Font: 13px regular
-- Color: Gray 500 (not set), Primary Blue (set)
-- Format:
-  - `📍 Geo: Not set` / `📍 Geo: 35.59°N, 82.55°W`
-  - `©: Not set` / `©: © 2026 Client`
-  - `📝: Not set` / `📝: Title set`
-- "Not set" in Gray 400, set values in Primary Blue
-
-**"Edit" Button:**
-- Position: Bottom right
-- Background: Transparent
-- Text: Primary Blue, 13px medium
-- Icon: `fa-pen-to-square`
-- Hover: Blue 50 background
-
----
-
-#### Queue Item - Expanded with Form (Per Image Mode)
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────────┐
-│ [thumb] filename.png                                    │
-│         1.4 MB → 448 KB (68% smaller)                   │
-│         ✓ Compressed · TinyPNG                          │
-├─────────────────────────────────────────────────────────┤
-│ METADATA FOR THIS IMAGE                                 │
-│                                                         │
-│ ☑ Geo-location                                          │
-│   Lat: [35.5951] Long: [-82.5515] [Map Link____]       │
-│                                                         │
-│ ☑ Copyright                                             │
-│   [© 2026 Client Name_____________________________]    │
-│                                                         │
-│ ☐ Title & Description                                   │
-│                                                         │
-│                                   [Cancel] [Save]       │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Form Container:**
-- Background: Gray 50 (`#F9FAFB`)
-- Border top: 1px solid Gray 200
-- Padding: 20px
-- Margin top: 12px
-
-**Form Title:**
-- Text: "METADATA FOR THIS IMAGE"
-- Font: 12px semibold, uppercase
-- Color: Gray 600
-- Letter spacing: 0.05em
-
-**Compact Field Layout:**
-- Input padding: 8px 10px (25% smaller than global)
-- Font: 13px
-- Geo-location: Inline lat/long/link fields
-- Copyright: Single line input
-- Title & Description: Collapsed by default
-
-**Format Compatibility (Per-Image):**
-
-If image format doesn't support metadata type, **disable** checkbox:
-
-```
-☑ Geo-location                    (Available)
-☐ Copyright                       (Disabled - PNG format)
-☑ Title & Description             (Available)
-```
-
-**Disabled Checkbox:**
-- Opacity: 0.5
-- Cursor: not-allowed
-- Tooltip: "PNG format does not support this metadata type"
-
-**Action Buttons:**
-
-**"Cancel":**
-- Background: Transparent
-- Text: Gray 600
-- Border: 1px solid Gray 300
-- Padding: 8px 16px
-- Hover: Gray 100 background
-- Action: Collapse form, discard changes
-
-**"Save":**
-- Background: Primary Blue
-- Text: White
-- Padding: 8px 16px
-- Hover: Blue 700
-- Action: Save to image state, collapse, update badges
-
----
-
-### Queue Item - After Metadata Applied
-
-#### Collapsed View with Applied Metadata
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────────┐
-│ [thumb] filename.png                                    │
-│         1.4 MB → 448 KB (68% smaller)                   │
-│         ✓ Complete · TinyPNG · Geo-tagged               │
-│         📍 35.59°N, 82.55°W · © Client · 📝 Title  [▾]  │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Metadata Badges (Applied):**
-- Color: Success Green (`#059669`)
-- Font: 13px medium
-- Truncation:
-  - Geo: 2 decimal places
-  - Copyright: First 20 chars + `...`
-  - Title: Just indicator `📝 Title`
-
----
-
-#### Expandable Metadata Details
-
-**Click badge row to expand:**
-
-```
-┌─────────────────────────────────────────────────────────┐
-│ [thumb] filename.png                                    │
-│         1.4 MB → 448 KB (68% smaller)                   │
-│         ✓ Complete · TinyPNG                            │
-│         ▾ Metadata Applied                         [↓]  │
-├─────────────────────────────────────────────────────────┤
-│   📍 Geo-location: 35.5951° N, 82.5515° W              │
-│   © Copyright: © 2026 Client Name. All rights...       │
-│   📝 Title: Professional landscape photo                │
-│      Description: High-quality image optimized...      │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Expanded Details:**
-- Background: White
-- Border top: 1px solid Gray 200
-- Padding: 16px 20px
-- Font: 13px regular
-- Color: Gray 700
-- Icon: 16px, Gray 400
-- Chevron rotates 90° when expanded
-- Description truncated to 50 chars, full text on hover
-
----
-
-### Processing Status - Boost Phase
-
-#### During Metadata Injection
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────────┐
-│ [thumb] filename.png                                    │
-│         1.4 MB → 448 KB (68% smaller)                   │
-│         Boosting... Adding metadata               ●     │
-└─────────────────────────────────────────────────────────┘
-
-[Boosting... 1 of 5]                            [Cancel]
-```
-
-**Status:**
-- Text: "Boosting... Adding metadata"
-- Spinner: Primary Blue, 16px
-- Progress footer: `[Boosting... X of Y]`
-- Cancel available
-
----
-
-#### Boost Error
-
-**Layout:**
-```
-┌─────────────────────────────────────────────────────────┐
-│ [thumb] filename.png                                    │
-│         1.4 MB → 448 KB (68% smaller)                   │
-│         ✗ Metadata failed: EXIF write error    [Retry]  │
-└─────────────────────────────────────────────────────────┘
-```
-
-**Error State:**
-- Icon: `fa-xmark`, Error Red
-- Message: Brief error description
-- Retry button available
-- Image still downloadable (compressed, no metadata)
-
----
-
-### Summary Bar (with Metadata Statistics)
-
-**After Boost:**
+### Summary Bar
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ 5 images · 8.2 MB → 2.1 MB · 74% total savings         │
-│ Metadata: 5 geo-tagged · 5 with copyright · 3 titles   │
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Metadata Summary Line:**
+Shown above the download section once compression completes:
 - Font: 13px regular
 - Color: Gray 600
-- Position: Below savings summary
-- Format: `X geo-tagged · Y with copyright · Z with titles`
-- Only show counts for enabled types
+- Format: `X images · [total before] → [total after] · Y% total savings`
 
 ---
 
-### Download Section (with Metadata Indicators)
-
-**After Boost:**
+### Download Section
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │ DOWNLOAD SECTION                                        │
 │                                                         │
-│ [Download All with Metadata (ZIP)]  [Clear Queue]      │
+│ [Download All (ZIP)]  [Clear Queue]                    │
 │                                                         │
 │ Or download individually:                               │
-│ • filename.png (448 KB, geo-tagged) [↓]                 │
-│ • photo.jpg (612 KB, geo-tagged, ©) [↓]                 │
+│ • filename.png (448 KB) [↓]                             │
+│ • photo.jpg (612 KB) [↓]                                │
 └─────────────────────────────────────────────────────────┘
 ```
 
 **"Download All" Button:**
-- Text: "Download All with Metadata (ZIP)"
-- If no metadata applied: "Download All (ZIP)"
+- Text: "Download All (ZIP)"
+- Bundles every compressed image into a single ZIP
 - Background: Accent Yellow
 - Icon: `fa-file-zipper`
 
 **Individual Downloads:**
-- Format: `filename.ext (size, metadata-tags)`
-- Tags: `geo-tagged`, `©`, `title`
+- Each queue item can be downloaded on its own
+- Format: `filename.ext (size)`
 
 ---
 
@@ -835,69 +381,6 @@ Implemented using **Sonner** library for consistent toast notifications.
 - Error variant: Left border 4px Error
 - Warning variant: Left border 4px Cake Yellow
 
-#### Boost-Specific Toast Messages
-
-**Boost Started:**
-```
-[ℹ] Adding metadata to 5 images...
-```
-- Type: Info, 2s duration, auto-dismiss
-
-**Boost Complete (Success):**
-```
-[✓] Metadata added to 5 images
-    5 geo-tagged · 5 with copyright
-```
-- Type: Success, 4s duration, auto-dismiss
-
-**Boost Partial Success:**
-```
-[⚠] Metadata added to 4 of 5 images
-    1 failed - see queue for details
-```
-- Type: Warning, 6s duration, manual dismiss
-
-**Boost Failed:**
-```
-[✗] Metadata injection failed
-    Network error - check connection and retry
-```
-- Type: Error, 8s duration, manual dismiss
-
-### Metadata Format Warnings
-
-Inline warning banners displayed in the Metadata Options Panel when format capabilities don't match selected options. These are **non-blocking warnings** - users can still process images.
-
-**Warning Trigger Conditions:**
-- User enables geo-tagging AND selects PNG output format (PNG does not support GPS coordinates)
-
-**Warning Style:**
-- Background: Yellow 50 (`#FEF7E6`)
-- Text: Yellow 700 (`#B87D0E`)
-- Border: 1px solid Yellow 100 (`#FDE9B8`)
-- Border radius: 6px
-- Padding: 12px 16px
-- Icon: `fa-exclamation-triangle` (Warning icon)
-
-**Warning Message:**
-```
-⚠ PNG does not support GPS coordinates. Switch to JPG or WebP for geo-tagged images, or disable geo-tagging to proceed.
-```
-
-**Behavior:**
-- Warning appears inline within the geo-tagging section when conditions are met
-- Warning does NOT block form submission or processing
-- User can proceed with processing (geo-tagging will be skipped for PNG outputs)
-- Warning disappears when user changes output format to JPG/WebP or disables geo-tagging
-
-**Format Capabilities Reference:**
-
-| Metadata Type | JPG/MozJPG | PNG | WebP |
-|---------------|------------|-----|------|
-| Geo-tagging (GPS) | ✅ Full EXIF | ❌ No support | ✅ Full EXIF |
-| Copyright | ✅ Full EXIF | ✅ tEXt chunks | ✅ Full EXIF |
-| Title/Description | ✅ Full EXIF | ✅ tEXt chunks | ✅ Full EXIF |
-
 ---
 
 ## Status Indicators
@@ -906,7 +389,6 @@ Inline warning banners displayed in the Metadata Options Panel when format capab
 |--------|--------|-------|-------------|
 | Queued | Circle outline | Gray 400 | Waiting to process |
 | Compressing | Spinner | Cake Blue | Smoosh phase active |
-| Boosting | Spinner + tag | Cake Blue | Boost phase active |
 | Complete | Checkmark | Success | All processing done |
 | Error | X icon | Error | Processing failed |
 
@@ -928,7 +410,7 @@ Inline warning banners displayed in the Metadata Options Panel when format capab
 ```
 [thumb] filename.png
         1.4 MB → 448 KB (68% smaller)
-        ✓ Complete · TinyPNG · Geo-tagged          [↓]
+        ✓ Complete · TinyPNG                       [↓]
 ```
 
 **Error state:**
@@ -950,7 +432,6 @@ Use **FontAwesome** icons throughout.
 | Upload | `fa-upload` |
 | Download | `fa-download` |
 | Compress/Smoosh | `fa-compress` |
-| Metadata/Boost | `fa-tag` |
 | Delete/Remove | `fa-trash` |
 | Retry | `fa-rotate-right` |
 | Expand/Collapse | `fa-chevron-down` / `fa-chevron-right` |
@@ -960,17 +441,10 @@ Use **FontAwesome** icons throughout.
 | Warning | `fa-exclamation-triangle` |
 | Info | `fa-info-circle` |
 | Image | `fa-image` |
-| Location/Geo | `fa-location-dot` |
-| Location Parse | `fa-location-crosshairs` |
-| Copyright | `fa-copyright` |
 | File | `fa-file` |
 | ZIP | `fa-file-zipper` |
-| Link/URL | `fa-link` |
 | Clear | `fa-broom` |
-| Edit | `fa-pen-to-square` |
-| Title/Description | `fa-align-left` |
 | Cancel | `fa-ban` |
-| Save | `fa-floppy-disk` |
 
 ### Icon Sizes
 
@@ -1020,7 +494,6 @@ Use **FontAwesome** icons throughout.
 Display in queue item:
 - **Queued:** "Waiting..." with circle outline, Gray 400
 - **Compressing:** "Compressing..." with spinner, Cake Blue
-- **Boosting:** "Adding metadata..." with spinner, Cake Blue
 - **Complete:** File size savings with checkmark, Success
 - **Error:** Error message with retry link, Error
 
@@ -1056,19 +529,6 @@ While designed for desktop/tablet (768px minimum), ensure:
 - Avoid animating width/height (use transform: scale instead)
 - Progress spinners: Infinite rotation, 1s duration
 
-### Boost-Specific Animation Timings
-
-| Element | Animation | Duration | Easing |
-|---------|-----------|----------|--------|
-| Panel expand/collapse | Height | 200ms | ease-in-out |
-| Chevron rotation | Transform | 150ms | ease-out |
-| Queue item expand | Height | 200ms | ease-in-out |
-| Metadata badge appear | Opacity + translateY | 300ms | ease-out |
-| Warning banner slide | translateY | 200ms | ease-out |
-| Form field focus | Border color | 150ms | ease |
-| Button hover | Background | 150ms | ease |
-| Per-image form slide | Height + opacity | 250ms | ease-in-out |
-
 ---
 
 ## Shared Form Components
@@ -1089,7 +549,7 @@ Multiline text with same styling as input.
 
 ### Checkbox
 
-Toggle with label for metadata options.
+Toggle with label.
 
 ### Section
 
@@ -1104,7 +564,7 @@ Collapsible accordion section with ARIA `aria-expanded` attribute.
 
 1. **Clarity over cleverness** — Every element should have obvious purpose
 2. **Generous whitespace** — Don't crowd the interface
-3. **Progressive disclosure** — Collapse complexity (metadata options), reveal on demand
+3. **Progressive disclosure** — Collapse complexity, reveal on demand
 4. **Consistent patterns** — Same action = same appearance everywhere
 5. **Informative feedback** — Always show processing status (toast notifications, inline status)
 6. **Error prevention** — Validate file types and sizes before processing
