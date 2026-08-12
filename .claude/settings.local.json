@@ -40,7 +40,10 @@
       "Bash(grep -nA1 -- \"^---$\" guidelines/guidelines.md)",
       "Bash(grep -B1 -- \"^[0-9]*---$\")",
       "Bash(grep -vE \"^\\\\./logs/|spec-image-smoosh-rebrand|wasm-data\\\\.ts|/ui\\\\.html$|/code\\\\.js$\")",
-      "Bash(node -p \"Object.keys\\(require\\('./package.json'\\).scripts\\).join\\(', '\\)\")"
+      "Bash(node -p \"Object.keys\\(require\\('./package.json'\\).scripts\\).join\\(', '\\)\")",
+      "mcp__f236e21f-3eb6-4d59-8827-6712cd1c4a67__list_deployments",
+      "Bash(echo \"http: $\\(curl -s -o /dev/null -w '%{http_code}' https://smshbst.vercel.app\\)\")",
+      "Bash(node /private/tmp/claude-501/-Users-shawnhiatt-Documents-Cake-Projects-smooshboost/f0749fb2-079d-4798-858e-9279bb183031/scratchpad/queue-sim.mjs)"
     ]
   }
 }

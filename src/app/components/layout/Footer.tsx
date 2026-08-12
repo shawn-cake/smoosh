@@ -11,7 +11,7 @@ export function Footer() {
       <img src={logo} alt="Smoosh" width={160} className="mx-auto opacity-50" />
       <div className="flex items-center justify-center gap-2">
         <p className="text-xs text-gray-700">
-          © Cake Websites · v0.4.0
+          © Cake Websites · v0.4.1
         </p>
         <div className="relative">
           <button

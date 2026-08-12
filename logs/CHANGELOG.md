@@ -21,6 +21,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.1] - 2026-08-12
+
+### Fixed
+- **Figma plugin: export no longer aborts the plugin VM on large batches** - `code.ts` converted each exported image with `Array.from(bytes)`, expanding a compact `Uint8Array` into a plain JS array with one boxed value per byte (~8–16 bytes of sandbox heap per image byte). Every file was then accumulated and handed to `figma.ui.postMessage` as a single payload, which Figma deep-copies property-by-property. Four 2000px layers exported for WebP (which exports as lossless PNG, the largest source bytes) exhausted the plugin VM and aborted with `Aborted()` inside `postMessage`. Bytes are now passed through as a `Uint8Array`, which `figma.ui.postMessage` serializes natively. Files: `packages/figma-plugin/code.ts`, `packages/figma-plugin/src/types.ts`.
+
+### Changed
+- **Figma plugin: export streams one file per message** - Replaced the single `EXPORT_READY` message carrying the whole batch with `EXPORT_BEGIN` → one `EXPORT_FILE` per exported layer → `EXPORT_DONE`. Peak memory is now one image per side instead of the whole selection, and compression starts on the first layer while the rest are still exporting. The UI compresses arrivals through a single-flight queue (codecs are CPU-bound WASM on one thread, so overlapping them would only raise peak memory). Files: `packages/figma-plugin/code.ts`, `packages/figma-plugin/src/ui.ts`, `packages/figma-plugin/src/types.ts`.
+- **Version bump to 0.4.1** - Root and Figma plugin `package.json` (both lockfiles resynced from a stale `1.0.0`), and `Footer.tsx`. Files: `package.json`, `package-lock.json`, `packages/figma-plugin/package.json`, `packages/figma-plugin/package-lock.json`, `src/app/components/layout/Footer.tsx`.
+
+---
+
 ## [0.2.0] - 2026-05-06
 
 ### Changed

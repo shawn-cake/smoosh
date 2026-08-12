@@ -7,7 +7,9 @@
 
 import type {
   SelectionUpdateMsg,
-  ExportReadyMsg,
+  ExportBeginMsg,
+  ExportFileMsg,
+  ExportDoneMsg,
   ExportedFile,
   CompressionResultItem,
 } from './types';
@@ -63,6 +65,20 @@ let compressionResults: CompressionResultItem[] = [];
 // While true, the status line shows operational status ("Compressing…",
 // "Done! …") and selection changes don't overwrite it.
 let processing = false;
+
+// ── Export stream state ──────────────────────────────────────────────
+// The sandbox streams files one message at a time, so compression runs as a
+// queue: files arriving while an earlier one is still compressing wait here
+// rather than running concurrently.
+let pendingFiles: ExportedFile[] = [];
+let draining = false;
+// Layer count announced by EXPORT_BEGIN — drives the progress denominator.
+let exportTotal = 0;
+let processedCount = 0;
+// Set by EXPORT_DONE; the queue can only be finished once the sandbox has
+// confirmed it has no more files to send.
+let exportComplete = false;
+let exportFinished = false;
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
@@ -200,77 +216,110 @@ function renderResults(): void {
 
 // ── Compression pipeline ─────────────────────────────────────────────
 
-async function handleExportReady(files: ExportedFile[]): Promise<void> {
+function beginExport(total: number): void {
   compressionResults = [];
   resultsList.innerHTML = '';
   downloadBar.style.display = 'none';
+  pendingFiles = [];
+  exportTotal = total;
+  processedCount = 0;
+  exportComplete = false;
+  exportFinished = false;
   showProgress(true);
   setStatus('Compressing…');
+}
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    updateProgress(i + 1, files.length);
+function enqueueFile(file: ExportedFile): void {
+  pendingFiles.push(file);
+  void drainQueue();
+}
 
-    const originalBytes = new Uint8Array(file.data).buffer;
-    const originalSize = originalBytes.byteLength;
-
-    try {
-      let compressedData: ArrayBuffer;
-      let mimeType: string;
-      let extension: string;
-      let engine: 'mozjpeg' | 'tinypng' | 'oxipng' | 'webp';
-
-      if (file.targetFormat === 'WEBP') {
-        // WebP path — Figma exported a lossless PNG; decode to pixels then
-        // encode WebP entirely client-side.
-        const imageData = await bytesToImageData(originalBytes, file.type);
-        compressedData = await compressWebp(imageData);
-        mimeType = 'image/webp';
-        extension = '.webp';
-        engine = 'webp';
-      } else if (file.targetFormat === 'JPG') {
-        compressedData = await compressJpeg(originalBytes);
-        mimeType = 'image/jpeg';
-        extension = '.jpg';
-        engine = 'mozjpeg';
-      } else {
-        // PNG path — TinyPNG first, fallback to OxiPNG
-        const result = await compressPng(originalBytes);
-        compressedData = result.data;
-        engine = result.engine;
-        mimeType = 'image/png';
-        extension = '.png';
-      }
-
-      compressionResults.push({
-        originalName: file.name,
-        originalSize,
-        compressedData,
-        compressedSize: compressedData.byteLength,
-        mimeType,
-        extension,
-        engine,
-      });
-    } catch (err) {
-      const errMsg = err instanceof Error ? err.message : String(err);
-      const errStack = err instanceof Error && err.stack ? err.stack : '';
-      console.error(`[Smoosh] Failed to compress ${file.name}:`, err);
-      setStatus(`Error compressing ${file.name}: ${errMsg}`);
-      // Render error visibly in results area
-      const errEl = document.createElement('div');
-      errEl.style.cssText = 'padding:8px 10px;font-size:10px;color:#F87171;font-family:monospace;white-space:pre-wrap;word-break:break-all;';
-      errEl.textContent = `[compress error] ${file.name}: ${errMsg}\n${errStack}`;
-      resultsList.appendChild(errEl);
+// Single-flight drain: one compression at a time, in arrival order. Codecs are
+// CPU-bound WASM on the iframe's single thread, so overlapping them would only
+// raise peak memory without finishing sooner.
+async function drainQueue(): Promise<void> {
+  if (draining) return;
+  draining = true;
+  try {
+    while (pendingFiles.length > 0) {
+      const file = pendingFiles.shift() as ExportedFile;
+      processedCount++;
+      updateProgress(processedCount, Math.max(exportTotal, processedCount));
+      await compressOne(file);
     }
+  } finally {
+    draining = false;
   }
+  if (exportComplete && pendingFiles.length === 0) finishExport();
+}
+
+async function compressOne(file: ExportedFile): Promise<void> {
+  const originalBytes = new Uint8Array(file.data).buffer;
+  const originalSize = originalBytes.byteLength;
+
+  try {
+    let compressedData: ArrayBuffer;
+    let mimeType: string;
+    let extension: string;
+    let engine: 'mozjpeg' | 'tinypng' | 'oxipng' | 'webp';
+
+    if (file.targetFormat === 'WEBP') {
+      // WebP path — Figma exported a lossless PNG; decode to pixels then
+      // encode WebP entirely client-side.
+      const imageData = await bytesToImageData(originalBytes, file.type);
+      compressedData = await compressWebp(imageData);
+      mimeType = 'image/webp';
+      extension = '.webp';
+      engine = 'webp';
+    } else if (file.targetFormat === 'JPG') {
+      compressedData = await compressJpeg(originalBytes);
+      mimeType = 'image/jpeg';
+      extension = '.jpg';
+      engine = 'mozjpeg';
+    } else {
+      // PNG path — TinyPNG first, fallback to OxiPNG
+      const result = await compressPng(originalBytes);
+      compressedData = result.data;
+      engine = result.engine;
+      mimeType = 'image/png';
+      extension = '.png';
+    }
+
+    compressionResults.push({
+      originalName: file.name,
+      originalSize,
+      compressedData,
+      compressedSize: compressedData.byteLength,
+      mimeType,
+      extension,
+      engine,
+    });
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    const errStack = err instanceof Error && err.stack ? err.stack : '';
+    console.error(`[Smoosh] Failed to compress ${file.name}:`, err);
+    setStatus(`Error compressing ${file.name}: ${errMsg}`);
+    // Render error visibly in results area
+    const errEl = document.createElement('div');
+    errEl.style.cssText = 'padding:8px 10px;font-size:10px;color:#F87171;font-family:monospace;white-space:pre-wrap;word-break:break-all;';
+    errEl.textContent = `[compress error] ${file.name}: ${errMsg}\n${errStack}`;
+    resultsList.appendChild(errEl);
+  }
+}
+
+function finishExport(): void {
+  if (exportFinished) return;
+  exportFinished = true;
 
   showProgress(false);
 
   if (compressionResults.length > 0) {
     renderResults();
     refreshCompletionStatus();
-  } else {
+  } else if (processedCount > 0) {
     setStatus('Compression failed for all files');
+  } else {
+    setStatus('Nothing exported — no layers could be exported');
   }
 
   // Done — release the status line and re-enable export.
@@ -295,9 +344,22 @@ window.addEventListener('message', (event: MessageEvent) => {
       break;
     }
 
-    case 'EXPORT_READY': {
-      const ready = msg as ExportReadyMsg;
-      handleExportReady(ready.files);
+    case 'EXPORT_BEGIN': {
+      beginExport((msg as ExportBeginMsg).total);
+      break;
+    }
+
+    case 'EXPORT_FILE': {
+      enqueueFile((msg as ExportFileMsg).file);
+      break;
+    }
+
+    case 'EXPORT_DONE': {
+      // The last file may still be compressing; the drain loop finishes up in
+      // that case. Only close out here if the queue is already idle.
+      exportTotal = (msg as ExportDoneMsg).sent;
+      exportComplete = true;
+      if (!draining && pendingFiles.length === 0) finishExport();
       break;
     }
   }

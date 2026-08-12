@@ -41,25 +41,36 @@ figma.ui.onmessage = async (msg) => {
     const figmaFormat = format === 'JPG' ? 'JPG' : 'PNG';
     const extension = figmaFormat === 'JPG' ? '.jpg' : '.png';
     const mime = figmaFormat === 'JPG' ? 'image/jpeg' : 'image/png';
-    const files = [];
+    // Stream one file per message rather than batching. Holding every exported
+    // image and handing them to postMessage as a single payload made peak
+    // sandbox memory the sum of the whole batch, which aborts the plugin VM on
+    // large selections. Posting per file lets each Uint8Array be collected as
+    // soon as it is handed off.
+    figma.ui.postMessage({ type: 'EXPORT_BEGIN', total: nodes.length });
+    let sent = 0;
     for (const node of nodes) {
         try {
             const bytes = await node.exportAsync({
                 format: figmaFormat,
                 constraint: { type: 'SCALE', value: scale },
             });
-            files.push({
-                name: node.name + extension,
-                data: Array.from(bytes),
-                type: mime,
-                targetFormat: format,
+            // Pass `bytes` straight through — Figma's postMessage serializes
+            // Uint8Array natively. Array.from() here would expand each byte into a
+            // boxed JS value and blow up the sandbox heap.
+            figma.ui.postMessage({
+                type: 'EXPORT_FILE',
+                file: {
+                    name: node.name + extension,
+                    data: bytes,
+                    type: mime,
+                    targetFormat: format,
+                },
             });
+            sent++;
         }
         catch (err) {
             figma.notify(`Failed to export "${node.name}"`);
         }
     }
-    if (files.length > 0) {
-        figma.ui.postMessage({ type: 'EXPORT_READY', files });
-    }
+    figma.ui.postMessage({ type: 'EXPORT_DONE', sent });
 };
